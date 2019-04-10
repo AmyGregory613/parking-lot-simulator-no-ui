@@ -22,7 +22,7 @@ var randomYear = function year(min, max) {
 
 function randomPlateNumber() {
 	  var text = "";
-	  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+	  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
 	  for (var i = 0; i < 6; i++){
 	    text += possible[Math.floor(Math.random() * possible.length)];
