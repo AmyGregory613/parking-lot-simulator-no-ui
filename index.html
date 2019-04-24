@@ -1,40 +1,175 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-	<title></title>
+    <title></title>
 </head>
+
 <body>
-	<h1>Parking Lot Simulator</h1>
-	<script type="text/javascript">
-	'use strict';
+    <h1>Parking Lot Simulator</h1>
+    <script type="text/javascript">
+    'use strict';
 
-	const NUMBER_OF_SPACES = 10;
+    const NUMBER_OF_SPACES = 10;
+    const NUMBER_OF_CARS = 100;
 
-	var spaceId = ["1", "2", "3", "4", "5", "6", "7", "8", "9","10"];
-	var spacesAvailable = [];
+    var car = Car.PlateNumber;
 
-	var carsWaiting = carFactory();// subtract cars that have been parked
+    var spacesAvailable = [];
+    var spacesOccupied = [];
 
-	var Space = function(spaceId){
-		for(var i = 0; i< spaceId.length; i++){
-			if{
-				this.empty == true;
-			} 
-			spacesAvailable.push(spaceId);
-		}
-	}
+    var parkedCars = [];
+    var unparkedCars = []; // subtract cars that have been parked
+    var departed = [];
 
-	function parkCar(){
-		for(var i = 0; i< NUMBER_OF_SPACES;i++){
-			let space = new Space();
-			result.push();
-		}
-	}
+    function randomColor() {
+        var possibleColors = ["white", "red", "black", "aqua", "light blue", "lime green"]
+        return possibleColors[Math.floor(Math.random() * possibleColors.length)];
+    }
+
+    function randomMake() {
+        var possibleMakes = ["ford", "subaru", "toyota", "chevy", "hundai", "tesla", "nissan"];
+        return possibleMakes[Math.floor(Math.random() * possibleMakes.length)];
+    }
+
+    function randomModel() {
+        var possibleModels = ["super", "delux", "mega", "ultra"];
+        return possibleModels[Math.floor(Math.random() * possibleModels.length)];
+    }
+
+    function randomYear(min, max) {
+        var result = Math.floor(Math.random() * (2019 - 2000)) + 2000;
+        // console.log(result);
+        return result;
+    }
+
+    function randomPlateNumber() {
+        var text = "";
+        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+        for (var i = 0; i < 6; i++) {
+            text += possible[Math.floor(Math.random() * possible.length)];
+        }
+        return text;
+
+    }
+    var randomTimeSpentInLot = getRandom(1000, 20 * 1000);
+
+    function getRandom(min, max) {
+        var result = Math.random() * (max - min) + min;
+        return Math.round(result);
+    }
+
+    // make one random car
+    function Car(PlateNumber) {
+        this.Color = randomColor();
+        this.Make = randomMake();
+        this.Model = randomModel();
+        this.Year = randomYear();
+        this.PlateNumber = randomPlateNumber();
+        this.TimeSpentInLot = randomTimeSpentInLot;
+        this.parked = false;
+        this.parkingSpace = null;
+    }
+
+    function createCars() {
+
+        for (var i = 0; i < NUMBER_OF_CARS; i++) {
+            let car = new Car();
+            unparkedCars.push(car);
+        }
+        console.log("unparked cars array", unparkedCars);
+        return unparkedCars;
+
+    }
+    createCars();
+
+    //create an instance of a parkingspace
+
+    var parkingSpace = function(id, vacant) {
+        this.id = id;
+        this.vacant = true;
+    }
+    var spaceAvailable = new parkingSpace(1);
+    console.log(spaceAvailable);
+
+    // Create a collection of 10 parking spaces
+    var createSpaces = function() {
+
+        for (var i = 0; i < NUMBER_OF_SPACES; i++) {
+            spacesAvailable.push(new parkingSpace(i));
+        }
+        console.log([spacesAvailable]);
+    };
+    createSpaces();
+
+    // Park a car
+    function parkCar() {
+        //eliminate an unused space, mark as occupied, show space as used, eliminate car from unparked cars list, associate space id with car plate number
+        console.log('%cNumber of unparked cars: ' + unparkedCars.length, 'color: blue; font-weight:bold');
+
+        if (unparkedCars.length > 0) {
+            (spacesAvailable.length > 0)
+            var space = spacesAvailable.shift();
+            space.vacant = false;
+            spacesAvailable.push(space);
+            var car = unparkedCars.shift();
+            car.parkingSpace = space.id;
+            parkedCars.push(car);
+            console.log("%cCar " + car.PlateNumber + " is parked in space " + space.id, 'color: purple; font-weight:bold;');
+
+            // schedule the car to leave the parking spot.
+            scheduleCarToLeaveParking(car, space);
+
+            return true;
+            // car leaves parking spot, show id of spot as vacant
+        }
+    }
+
+    parkCar();
+
+    function scheduleCarToLeaveParking(car, space) {
+        var seconds = getRandomArbitrary(1000, 5000);
+        // setup the timeout that schedules the car to leave parking after some time.
+        // when the timer "hits," do the following:
+        //      - remove the given car from the parked cars array.
+        //      - set the space to vacant.
+        //      - clear the car's parking space value.
+
+        setTimeout(function() {
+            car.parkingSpace = null;
+            space.vacant = true;
+
+            var carIndex = parkedCars.indexOf(car);
+            parkedCars.splice(carIndex, 1);
+
+            var spaceIndex = spacesOccupied.indexOf(space);
+            spacesOccupied.splice(spaceIndex, 1);
+            spacesAvailable.push(space);
+
+            console.log("%cCar " + car.PlateNumber + " is leaving space " + space.id + " after " + seconds + " milliseconds.", 'color: green; font-weight:bold;');
+        }, seconds);
+
+    }
+
+    setTimeout(function() {
+
+        var intervalId = setInterval(function() {
+            parkCar();
+
+            if (unparkedCars.length == 0) {
+                clearInterval(intervalId);
+                console.log("%cThere are no more cars to park!", 'color: red; font-weight:bold;');
+            }
+        }, 1000);
+
+    }, 10000);
 
 
-	
-
-	</script>
-	<script src="car.js"></script>
+    function getRandomArbitrary(min, max) {
+        return Math.random() * (max - min) + min;
+    }
+    </script>
 </body>
+
 </html>
